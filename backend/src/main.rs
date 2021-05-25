@@ -1,7 +1,22 @@
+#![feature(proc_macro_hygiene, decl_macro)]
+
+#[macro_use]
+extern crate diesel;
+/*#[macro_use]
+extern crate diesel_migrations;*/
+/*#[macro_use]
+extern crate actix_web;*/
+#[macro_use]
+extern crate serde_derive;
+/*#[macro_use]
+extern crate tokio;*/
+
+mod schema;
+mod user;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use serde_json::json;
 use tokio::net::TcpListener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
