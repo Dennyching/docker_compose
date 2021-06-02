@@ -14,7 +14,6 @@ pub struct Todo {
     pub body: String,
     pub complete: bool,
 }
-
 impl Todo {
     pub async fn insert(pool: &PgPool, body: &str) -> anyhow::Result<Todo> {
         let id = Uuid::new_v4().to_string();
@@ -48,6 +47,20 @@ impl Todo {
             .fetch_all(pool)
             .await?;
         Ok(recs)
+    }
+    pub async fn select_id(pool: &PgPool,id: &str) -> Result<Option<Todo>,sqlx::Error> {
+        let todo = sqlx::query(
+            r#"
+            SELECT * FROM todo WHERE id=$1"#,) 
+            .bind(id)
+            .map(|row:PgRow| Todo{
+                id:row.get("id"),
+                body:row.get("body"),
+                complete:row.get("complete")
+            })
+            .fetch_optional(pool)
+            .await?;
+        Ok(todo)
     }
 
     pub async fn update(

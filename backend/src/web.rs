@@ -2,10 +2,21 @@ use crate::graphql::{MutationRoot, QueryRoot, SubscriptionRoot};
 use async_graphql::http::*;
 use async_graphql::{QueryBuilder, Schema};
 use async_graphql_warp::graphql_subscription;
-use sqlx::{PgPool, Row};
+use sqlx::{
+    postgres::{PgPoolOptions},
+    Connection, PgConnection, PgPool,
+};
 use std::convert::Infallible;
 use warp::{http::Response, Filter, Reply};
 
+pub async fn connect_pg(database_url:&str)-> Result<(PgConnection, PgPool), sqlx::Error>{
+    let conn = PgConnection::connect(database_url).await?;
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(database_url)
+        .await?;
+        Ok((conn, pool))
+}
 pub async fn start(pool: PgPool) {
     let schema = Schema::build(QueryRoot, MutationRoot, SubscriptionRoot)
         .data(pool)
